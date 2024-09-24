@@ -112,7 +112,7 @@ int main()
 
     original = {
         {"is_enabled", true},
-        {"is_enabled", false},
+        {"is_disabled", false},
     };
 
     // std::cout << "Schema " << schema << std::endl;
