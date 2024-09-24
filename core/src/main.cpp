@@ -20,16 +20,9 @@ void runTest(const std::string &testName, const nlohmann::json &schema, const nl
 
     nlohmann::json decoded = pb.decode(encoded, schema);
     std::cout << "Decoded:\n"
-              << decoded.dump(2) << std::endl;
+              << decoded.dump() << std::endl;
 
-    std::cout << "\n"
-              << std::endl;
-
-    if (original == decoded)
-    {
-        std::cout << "Test passed: Original and decoded match.\n";
-    }
-    else
+    if (original != decoded)
     {
         std::cout << "Test failed: Original and decoded do not match.\n";
     }
@@ -74,6 +67,9 @@ int main()
             {{"is_enabled", false}, {"is_disabled", false}},
             {{"is_enabled", true}, {"is_disabled", false}},
             pb);
+
+    std::cout << "\n\n"
+              << std::endl;
 
     return 0;
 }
