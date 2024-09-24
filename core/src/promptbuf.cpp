@@ -68,110 +68,98 @@ json PromptBuf::decodeValue(std::istringstream &iss, const json &schema)
 {
     char c;
     iss >> c;
+
     if (c == '[')
     {
-        json obj;
-        auto it = schema.begin();
-        while (iss.peek() != ']' && it != schema.end())
-        {
-            obj[it.key()] = decodeValue(iss, it.value());
-            ++it;
-            if (iss.peek() == ',')
-                iss.get();
-        }
-        iss.get(); // consume ']'
-        return obj;
+        return decodeObject(iss, schema);
     }
     else if (c == '{')
     {
-        json arr = json::array();
-        json element_schema = schema.is_array() ? schema[0] : schema;
-        while (iss.peek() != '}')
-        {
-            std::string value;
-
-            char ch;
-            while (iss.get(ch) && ch != ' ' && ch != ',' && ch != '}')
-            {
-                value += ch;
-            }
-            if (ch == '}')
-            {
-                iss.putback(ch);
-            }
-
-            if (element_schema.is_number_integer())
-            {
-                arr.push_back(std::stoi(value));
-            }
-            else if (element_schema.is_number_float())
-            {
-                arr.push_back(std::stod(value));
-            }
-            else if (element_schema.is_boolean())
-            {
-                arr.push_back(value == "1");
-            }
-            else
-            {
-                arr.push_back(value);
-            }
-
-            if (iss.peek() == ',')
-            {
-                std::cout << "Jumping" << std::endl;
-                iss.get();
-            }
-        }
-
-        iss.get(); // consume '}'
-
-        return arr;
+        return decodeArray(iss, schema);
     }
     else if (c == '"')
     {
-        std::string value;
-        std::getline(iss, value, '"');
-        return value;
+        return decodeString(iss);
     }
     else
     {
-        iss.putback(c);
-        std::string value;
-
-        char ch;
-        while (iss.get(ch) && ch != ' ' && ch != ',' && ch != '}' && ch != ']')
-        {
-            value += ch;
-        }
-        if (ch == ']')
-        {
-            iss.putback(ch);
-        }
-
-        if (schema.is_boolean())
-        {
-            return (value == "1");
-        }
-        else if (schema.is_number_integer())
-        {
-            return std::stoi(value);
-        }
-        else if (schema.is_number_float())
-        {
-            return std::stod(value);
-        }
-        else if (schema.is_string())
-        {
-            return value;
-        }
-        else if (value == "null")
-        {
-            return nullptr;
-        }
-        else
-        {
-            return value;
-        }
+        return decodePrimitive(iss, c, schema);
     }
+}
+
+json PromptBuf::decodeObject(std::istringstream &iss, const json &schema)
+{
+    json obj;
+    auto it = schema.begin();
+    while (iss.peek() != ']' && it != schema.end())
+    {
+        obj[it.key()] = decodeValue(iss, it.value());
+        ++it;
+        if (iss.peek() == ',')
+            iss.get();
+    }
+    iss.get(); // consume ']'
+    return obj;
+}
+
+json PromptBuf::decodeArray(std::istringstream &iss, const json &schema)
+{
+    json arr = json::array();
+    json element_schema = schema.is_array() ? schema[0] : schema;
+    while (iss.peek() != '}')
+    {
+        char nextChar;
+        iss >> nextChar;
+        arr.push_back(decodePrimitive(iss, nextChar, element_schema));
+    }
+    iss.get(); // consume '}'
+    return arr;
+}
+
+std::string PromptBuf::decodeString(std::istringstream &iss)
+{
+    std::string value;
+    std::getline(iss, value, '"');
+    return value;
+}
+
+json PromptBuf::decodePrimitive(std::istringstream &iss, char firstChar, const json &schema)
+{
+
+    iss.putback(firstChar);
+    std::string value = readUntil(iss, " }]");
+
+    if (schema.is_boolean())
+    {
+        return (value == "1");
+    }
+    else if (schema.is_number_integer())
+    {
+        return std::stoi(value);
+    }
+    else if (schema.is_number_float())
+    {
+        return std::stod(value);
+    }
+    else if (value == "null")
+    {
+        return nullptr;
+    }
+    else
+    {
+        return value;
+    }
+};
+
+std::string PromptBuf::readUntil(std::istringstream &iss, const std::string &delimiters)
+{
+    std::string value;
+    char ch;
+    while (iss.get(ch) && delimiters.find(ch) == std::string::npos)
+    {
+        value += ch;
+    }
+    if (!iss.eof())
+        iss.putback(ch);
+    return value;
 };

@@ -2,129 +2,78 @@
 #include <iostream>
 #include <json.hpp>
 
+void runTest(const std::string &testName, const nlohmann::json &schema, const nlohmann::json &original, PromptBuf &pb)
+{
+    std::cout << "\n=== " << testName << " ===\n";
+    std::cout << "Original:\n"
+              << original.dump() << std::endl;
+
+    std::cout << "\n"
+              << std::endl;
+
+    std::string encoded = pb.encode(original);
+    std::cout << "Encoded:\n"
+              << encoded << std::endl;
+
+    std::cout << "\n"
+              << std::endl;
+
+    nlohmann::json decoded = pb.decode(encoded, schema);
+    std::cout << "Decoded:\n"
+              << decoded.dump(2) << std::endl;
+
+    std::cout << "\n"
+              << std::endl;
+
+    if (original == decoded)
+    {
+        std::cout << "Test passed: Original and decoded match.\n";
+    }
+    else
+    {
+        std::cout << "Test failed: Original and decoded do not match.\n";
+    }
+}
+
 int main()
 {
     PromptBuf pb;
 
-    std::cout << "\n\n";
+    // Test 1: Basic int and string
+    runTest("Basic int and string",
+            {{"id", 0}, {"name", ""}},
+            {{"id", 1}, {"name", "Tyler"}},
+            pb);
 
-    // Basic int and string
-    nlohmann::json schema = {
-        {"id", 0},
-        {"name", ""}};
+    // Test 2: Boolean
+    runTest("Boolean",
+            {{"id", 0}, {"is_good", false}},
+            {{"id", 1}, {"is_good", true}},
+            pb);
 
-    nlohmann::json original = {
-        {"id", 1},
-        {"name", "Tyler"}};
+    // Test 3: Multiple types
+    runTest("Multiple types",
+            {{"boolean_value", false}, {"integer_value", 0}, {"float_value", 0.0}, {"string_value", ""}},
+            {{"boolean_value", false}, {"integer_value", 20}, {"float_value", 1.0}, {"string_value", "i'm a string!"}},
+            pb);
 
-    // std::cout << "Schema " << schema << std::endl;
-    std::cout << "Original " << original << std::endl;
+    // Test 4: Null
+    runTest("Null",
+            {{"record", nullptr}, {"string_value", ""}},
+            {{"record", nullptr}, {"string_value", "i'm a string!"}},
+            pb);
 
-    std::string encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
+    // Test 5: Array
+    runTest("Array",
+            {{"ids", nlohmann::json::array({0})}},
+            {{"ids", {1, 2, 3, 4}}},
+            pb);
 
-    nlohmann::json decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl;
-
-    std::cout << "\n\n";
-
-    // Boolean
-    schema = {
-        {"id", 0},
-        {"is_good", false}};
-
-    original = {
-        {"id", 1},
-        {"is_good", true}};
-
-    // std::cout << "Schema " << schema << std::endl;
-    std::cout << "Original " << original << std::endl;
-
-    encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
-
-    decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl; // not working
-
-    std::cout << "\n\n";
-
-    // Array
-    schema = {
-        {"boolean_value", false},
-        {"integer_value", 0},
-        {"float_value", 0.0},
-        {"string_value", ""}};
-
-    original = {
-        {"boolean_value", false},
-        {"integer_value", 20},
-        {"float_value", 1.0},
-        {"string_value", "i'm a string!"}};
-
-    // std::cout << "Schema " << schema << std::endl;
-    std::cout << "Original " << original << std::endl;
-
-    encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
-
-    decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl;
-
-    std::cout << "\n\n";
-
-    // Null
-    schema = {
-        {"record", nullptr},
-        {"string_value", "i'm a string!"}};
-
-    original = {
-        {"record", nullptr},
-        {"string_value", "i'm a string!"}};
-
-    // std::cout << "Schema " << schema << std::endl;
-    std::cout << "Original " << original << std::endl;
-
-    encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
-
-    decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl;
-
-    std::cout << "\n\n";
-
-    // Array
-    schema = {{"ids", nlohmann::json::array({0})}};
-    original = {{"ids", {1, 2, 3, 4}}};
-
-    encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
-
-    decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl;
-
-    std::cout << "\n\n";
-
-    // Null
-    schema = {
-        {"is_enabled", false},
-        {"is_disabled", false},
-    };
-
-    original = {
-        {"is_enabled", true},
-        {"is_disabled", false},
-    };
-
-    // std::cout << "Schema " << schema << std::endl;
-    std::cout << "Original " << original << std::endl;
-
-    encoded = pb.encode(original);
-    std::cout << "Encoded: " << encoded << std::endl;
-
-    decoded = pb.decode(encoded, schema);
-    std::cout << "Decoded: " << decoded.dump() << std::endl;
-
-    std::cout << "\n\n";
+    // Test 6: Double Booleans
+    runTest("Double Booleans",
+            {{"is_enabled", false}, {"is_disabled", false}},
+            {{"is_enabled", true}, {"is_disabled", false}},
+            pb);
 
     return 0;
 }
