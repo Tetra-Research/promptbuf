@@ -63,8 +63,8 @@ int main()
             {{"record", nullptr}, {"string_value", "i'm a string!"}},
             pb);
 
-    // Test 5: Array
-    runTest("Array",
+    // Test 5: Primitive Array
+    runTest("Primitive Array",
             {{"ids", nlohmann::json::array({0})}},
             {{"ids", {1, 2, 3, 4}}},
             pb);
