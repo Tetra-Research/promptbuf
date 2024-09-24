@@ -5,3 +5,6 @@ build/
 *.obj
 *.exe
 .vscode
+
+# Typescript
+node_modules

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>My C++ Library Example</title>
+	</head>
+	<body>
+		<h1>My C++ Library Example</h1>
+		<p>Open the console to see the result.</p>
+
+		<script src="./dist/index.js"></script>
+		<script>
+			async function run() {
+				const lib = new MyCppLib.default();
+				await lib.initialize();
+				const result = lib.add(5, 3);
+				console.log("5 + 3 =", result);
+				document.body.innerHTML += `<p>5 + 3 = ${result}</p>`;
+			}
+			run();
+		</script>
+	</body>
+</html>
