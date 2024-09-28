@@ -75,7 +75,7 @@ export const decode = (v: string, s: JSONSchema7) => {
 	return __decode(v.split(""), s);
 };
 
-const __decode = (v: string[], s: JSONSchema7) => {
+const __decode = (v: string[], s: JSONSchema7): any => {
 	const char = v.shift();
 
 	if (char === undefined) {
@@ -84,21 +84,51 @@ const __decode = (v: string[], s: JSONSchema7) => {
 
 	switch (char) {
 		case "{":
-		// check if the schema is an object
+			return __decode_object(v, s);
 		case "[":
-		// check if the schema is an array
+			return __decode_array(v, s);
 		case '"':
-			// check if hte schema is a string
-			break;
+			return __decode_string(v);
+		case " ":
+		case "}":
+		case "]":
+			return __decode(v, s);
 		default:
 			v.unshift(char);
 			return __decode_primitive(v, s);
-		// process it as a primitive
 	}
 };
 
+const __decode_object = (v: string[], s: JSONSchema7): any => {
+	const o: any = {};
+
+	if (!s.properties) return undefined;
+
+	const pKeys = Object.keys(s.properties);
+
+	for (let i = 0; i < pKeys.length; i++) {
+		o[pKeys[i]] = __decode(v, s.properties[pKeys[i]] as JSONSchema7);
+	}
+
+	return o;
+};
+
+const __decode_array = (v: string[], s: JSONSchema7): any[] => {
+	const a = [];
+	while (v[0] !== "]") {
+		a.push(__decode(v, s.items as JSONSchema7));
+	}
+	return a;
+};
+
+const __decode_string = (v: string[]) => {
+	const value = read_until(v, ['"']);
+	v.shift();
+	return value;
+};
+
 const __decode_primitive = (v: string[], s: JSONSchema7) => {
-	const value = read_until(v, [" ", ")", "]"]);
+	const value = read_until(v, [" ", "}", "]"]);
 
 	switch (s.type) {
 		case "integer":
@@ -109,6 +139,11 @@ const __decode_primitive = (v: string[], s: JSONSchema7) => {
 			return value === "1";
 		case "null":
 			return null;
+		case "string":
+			if (s.enum) {
+				return s.enum[parseInt(value, 10)];
+			}
+			return value;
 	}
 };
 
