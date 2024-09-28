@@ -70,3 +70,55 @@ const __encode = (v: any, s: JSONSchema7, output: string[]) => {
 			return "";
 	}
 };
+
+export const decode = (v: string, s: JSONSchema7) => {
+	return __decode(v.split(""), s);
+};
+
+const __decode = (v: string[], s: JSONSchema7) => {
+	const char = v.shift();
+
+	if (char === undefined) {
+		return undefined;
+	}
+
+	switch (char) {
+		case "{":
+		// check if the schema is an object
+		case "[":
+		// check if the schema is an array
+		case '"':
+			// check if hte schema is a string
+			break;
+		default:
+			v.unshift(char);
+			return __decode_primitive(v, s);
+		// process it as a primitive
+	}
+};
+
+const __decode_primitive = (v: string[], s: JSONSchema7) => {
+	const value = read_until(v, [" ", ")", "]"]);
+
+	switch (s.type) {
+		case "integer":
+			return parseInt(value, 10);
+		case "number":
+			return parseFloat(value);
+		case "boolean":
+			return value === "1";
+		case "null":
+			return null;
+	}
+};
+
+const read_until = (v: string[], delimiters: string[]) => {
+	let value = "";
+
+	while (v.length > 0 && !delimiters.includes(v[0])) {
+		const char = v.shift();
+		value += char;
+	}
+
+	return value;
+};
