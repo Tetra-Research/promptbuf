@@ -1,13 +1,4 @@
-/*
-The new schema we're aiming for is literally minifiying
-
-so {} are objects, [] are arrays
-booleans are 0/1
-strings stay ""
-nulls stay null
-enums are their positional value
-*/
-import { JSONSchema7, JSONSchema7Definition } from "json-schema";
+import { JSONSchema7 } from "json-schema";
 
 export const encode = (v: any, s: JSONSchema7): string => {
 	const output: string[] = [];
@@ -18,8 +9,6 @@ export const encode = (v: any, s: JSONSchema7): string => {
 };
 
 const __encode = (v: any, s: JSONSchema7, output: string[]) => {
-	// if
-
 	switch (s.type) {
 		case "object":
 			let ov: string[] = [];
@@ -34,10 +23,9 @@ const __encode = (v: any, s: JSONSchema7, output: string[]) => {
 			break;
 
 		case "array":
+			// For now, arrays can only contain a single type
 			if (!s.items) return "[]";
 			let av: string[] = [];
-
-			// For now, we only support single-type arrays
 
 			for (let i = 0; i < v.length; i++) {
 				__encode(v[i], s.items as JSONSchema7, av);

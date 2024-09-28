@@ -8,3 +8,4 @@ build/
 
 # Typescript
 node_modules
+dist

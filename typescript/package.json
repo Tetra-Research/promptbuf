@@ -5,23 +5,16 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build:wasm": "emcc src/cpp/binding.cpp -o src/wasm/binding.wasm -s WASM=1 -s EXPORTED_FUNCTIONS='[\"_add\"]' -s EXPORTED_RUNTIME_METHODS='[\"ccall\", \"cwrap\"]'",
-		"build:ts": "webpack",
-		"build": "npm run build:wasm && npm run build:ts",
-		"dev": "ts-node src/ts/index2.ts",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "tsc",
+		"dev": "ts-node src/index.ts"
 	},
 	"keywords": [
-		"c++",
-		"wasm",
 		"typescript"
 	],
 	"author": "Tyler O'Briant",
 	"license": "ISC",
 	"devDependencies": {
 		"ts-loader": "^9.5.1",
-		"typescript": "^5.6.2",
-		"webpack": "^5.94.0",
-		"webpack-cli": "^5.1.4"
+		"typescript": "^5.6.2"
 	}
 }

@@ -1,5 +1,5 @@
 import { JSONSchema7 } from "json-schema";
-import { decode, encode } from "./promptbuf2";
+import { decode, encode } from "./promptbuf";
 
 const runTest = (name: string, schema: JSONSchema7, value: any) => {
 	console.log(`\n=== ${name} ===`);
