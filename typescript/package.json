@@ -8,6 +8,7 @@
 		"build:wasm": "emcc src/cpp/binding.cpp -o src/wasm/binding.wasm -s WASM=1 -s EXPORTED_FUNCTIONS='[\"_add\"]' -s EXPORTED_RUNTIME_METHODS='[\"ccall\", \"cwrap\"]'",
 		"build:ts": "webpack",
 		"build": "npm run build:wasm && npm run build:ts",
+		"dev": "ts-node src/ts/index2.ts",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
