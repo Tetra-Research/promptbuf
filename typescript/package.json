@@ -1,0 +1,20 @@
+{
+	"name": "typescript",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"dev": "ts-node src/index.ts"
+	},
+	"keywords": [
+		"typescript"
+	],
+	"author": "Tyler O'Briant",
+	"license": "ISC",
+	"devDependencies": {
+		"ts-loader": "^9.5.1",
+		"typescript": "^5.6.2"
+	}
+}
