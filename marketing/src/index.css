@@ -28,3 +28,10 @@ body {
   /* Use 100dvh for mobile browsers */
   min-height: 100dvh;
 }
+
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}
