@@ -4,32 +4,55 @@ import { Promptbuf } from "promptbuf";
 
 const enc = encoding_for_model("gpt-4o");
 function Tokenizer() {
-	const [inputText, setInputText] = useState("");
-	const [encodedText, setEncodedText] = useState("");
+	const preloads = [
+		{
+			name: "Simple object",
+			schema: {
+				type: "object",
+				properties: {
+					name: { type: "string" },
+					age: { type: "integer" },
+					verifiedAccount: { type: "boolean" },
+				},
+			},
+			value: {
+				name: "John Doe",
+				age: 29,
+				verifiedAccount: true,
+			},
+		},
+	];
+
+	const [selected] = useState(preloads[0]);
+	const [encoded, setEncoded] = useState("");
 
 	useEffect(() => {
-		const pb = new Promptbuf({
-			type: "array",
-			items: { type: "integer" },
-		});
+		const pb = new Promptbuf(selected.schema);
 
-		setEncodedText(pb.encode(inputText));
-	}, [inputText]);
+		setEncoded(pb.encode(selected.value));
+	}, [selected]);
+
+	const numValueTokens = enc.encode(JSON.stringify(selected.value)).length;
+	const numEncodedTokens = enc.encode(encoded).length;
+	const percentReduction =
+		100 * ((numValueTokens - numEncodedTokens) / numValueTokens);
 
 	return (
 		<div className="text-white">
 			<h1 className="text-white">Tokenizer</h1>
-			<p>{JSON.stringify(encodedText)}</p>
-			<input
-				type="text"
-				value={inputText}
-				onChange={(e) => setInputText(e.target.value)}
-				placeholder="Enter text"
-				className="border p-2 mr-2 text-black"
-			/>
-			<p className="text-white">input: {inputText}</p>
-			<p className="text-white">encoded: {encodedText}</p>
-			<p className="text-white">{enc.encode(inputText).length}</p>
+			<div>
+				<p>Value</p>
+				<p>{JSON.stringify(selected.value, null, 2)}</p>
+				<p>{numValueTokens}</p>
+			</div>
+			<div>
+				<p>Encoded</p>
+				<p>{encoded}</p>
+				<p>{numEncodedTokens}</p>
+			</div>
+			<div>
+				<p>Reduced by: {percentReduction}%</p>
+			</div>
 		</div>
 	);
 }
