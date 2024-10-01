@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { encoding_for_model, Tiktoken, TiktokenModel } from "tiktoken";
-import { Promptbuf } from "promptbuf";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { Promptbuf } from "promptbuf"; // type: ignore
 import {
 	Select,
 	SelectContent,
