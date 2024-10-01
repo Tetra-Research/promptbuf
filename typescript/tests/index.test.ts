@@ -1,5 +1,5 @@
 import { JSONSchema7 } from "json-schema";
-import { Promptbuf } from "../src/promptbuf";
+import { Promptbuf } from "../src";
 
 const runTest = (name: string, schema: JSONSchema7, value: any) => {
 	const pb = new Promptbuf(schema);
