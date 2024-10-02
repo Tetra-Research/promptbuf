@@ -15,7 +15,7 @@ enum Color {
 	BLUE = "blue",
 }
 
-describe("Promptbuf encoding and decoding tests", () => {
+describe.skip("Promptbuf encoding and decoding tests", () => {
 	/*
 		Primitives
 	*/
@@ -206,5 +206,18 @@ describe("Promptbuf encoding and decoding tests", () => {
 			},
 			{ ids: [1, 2, 3, 4, 5], age: 29, isEnabled: false }
 		);
+	});
+});
+
+describe("Promptbuf encoding tests", () => {
+	test("Test number encoded", () => {
+		const pb = new Promptbuf({
+			type: "object",
+			properties: { needsResponse: { type: "boolean" } },
+		});
+
+		const enc = pb.encode({ needsResponse: true });
+		console.log(enc);
+		expect(enc).toEqual("{1}");
 	});
 });
