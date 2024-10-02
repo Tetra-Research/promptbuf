@@ -17,11 +17,27 @@ import { JSONSchema7 } from "json-schema";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 
+enum Sentiment {
+	POSITIVE = "positive",
+	NEUTRAL = "neutral",
+	NEGATIVE = "negative",
+}
+
+enum Persona {
+	BANTERER = "banterer",
+	CONCIERGE = "concierge",
+	RECEPTIONIST = "receptionist",
+}
+
 interface Example {
 	id: string;
 	name: string;
 	schema: JSONSchema7;
 	value: unknown;
+	extraCode?: {
+		python: string;
+		ts: string;
+	};
 }
 
 const examples: Example[] = [
@@ -130,6 +146,57 @@ const examples: Example[] = [
 			},
 		},
 	},
+	{
+		name: "Conversation Analysis",
+		id: "conversation_analysis",
+		value: {
+			needs_response: false,
+			has_information: true,
+			sentiment: Sentiment.POSITIVE,
+			persona: Persona.RECEPTIONIST,
+		},
+		schema: {
+			type: "object",
+			properties: {
+				needs_response: { type: "boolean" },
+				has_information: { type: "boolean" },
+				sentiment: {
+					type: "string",
+					enum: [Sentiment.NEGATIVE, Sentiment.NEUTRAL, Sentiment.POSITIVE],
+				},
+				persona: {
+					type: "string",
+					enum: [Persona.BANTERER, Persona.CONCIERGE, Persona.RECEPTIONIST],
+				},
+			},
+		},
+		extraCode: {
+			ts: `enum Sentiment {
+	POSITIVE = "positive",
+	NEUTRAL = "neutral",
+	NEGATIVE = "negative",
+}
+
+enum Persona {
+	BANTERER = "banterer",
+	CONCIERGE = "concierge",
+	RECEPTIONIST = "receptionist",
+}
+`,
+			python: `from enum import Enum 
+
+class Sentiment(Enum):
+	POSITIVE = "positive"
+	NEUTRAL = "neutral"
+	NEGATIVE = "negative"
+
+class Persona(Enum):
+	BANTERER = "banterer"
+	CONCIERGE = "concierge"
+	RECEPTIONIST = "receptionist"
+`,
+		},
+	},
 ];
 
 const buildTSExample = (ex: Example) => {
@@ -137,9 +204,11 @@ const buildTSExample = (ex: Example) => {
 	const schemaStr = JSON.stringify(ex.schema, null, 2);
 	const valueStr = JSON.stringify(ex.value, null, 2);
 	const encoded = pb.encode(ex.value);
+	console.log("encoded", encoded);
 	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
 
-	return `import { Promptbuf } from "promptbuf";
+	return `import { Promptbuf } from "promptbuf"
+	${ex.extraCode?.ts ?? "" + "\n"}
 
 const json_schema = ${schemaStr};
 
@@ -165,7 +234,7 @@ const buildPythonExample = (ex: Example) => {
 	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
 
 	return `from promptbuf import Promptbuf
-
+${ex.extraCode?.python ?? "" + "\n"}
 json_schema = ${schemaStr}
 
 value = ${valueStr}
@@ -224,7 +293,13 @@ function Metric({ title, value }: { title: string; value: string }) {
 				<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
 					{title}
 				</h3>
-				<p className="text-xl sm:text-2xl lg:text-3xl font-bold">{value}</p>
+				<p
+					className={`text-xl sm:text-2xl lg:text-3xl ${
+						value.length > 0 ? "font-bold" : "font-normal"
+					}`}
+				>
+					{value.length > 0 ? value : "--"}
+				</p>
 			</div>
 		</div>
 	);
@@ -400,7 +475,6 @@ function Tokenizer() {
 						/>
 					</div>
 				</div>
-				{/* <div className="w-full px-4 sm:px-6 md:px-8  lg:w-3/4 xl:w-2/3"> */}
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-11/12">
 					<Metric
 						title="Original Tokens"
@@ -409,7 +483,7 @@ function Tokenizer() {
 								? encoding_for_model(selectedModel.model)
 										.encode(JSON.stringify(selectedExample.value))
 										.length.toString()
-								: "--"
+								: ""
 						}
 					/>
 					<Metric
@@ -423,19 +497,18 @@ function Tokenizer() {
 											)
 										)
 										.length.toString()
-								: "--"
+								: ""
 						}
 					/>
 					<Metric
 						title="Token Count"
-						value={bothSelected ? `${percentReduction}%` : "--"}
+						value={bothSelected ? `${percentReduction}%` : ""}
 					/>
 					<Metric
 						title="Latency Change"
-						value={bothSelected ? `${latencyReduction} ms` : "--"}
+						value={bothSelected ? `${latencyReduction} ms` : ""}
 					/>
 				</div>
-				{/* </div> */}
 			</div>
 		</div>
 	);
