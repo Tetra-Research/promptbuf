@@ -175,6 +175,45 @@ def test_arrays(name, schema, value):
             },
             {"ids": [1, 2, 3, 4, 5], "age": 29, "isEnabled": False},
         ),
+        (
+            "Nested array of objects",
+            {
+                "type": "object",
+                "properties": {
+                    "employees": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                },
+                                "role": {
+                                    "type": "string",
+                                },
+                                "salary": {
+                                    "type": "integer",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
+                "employees": [
+                    {
+                        "name": "Alice",
+                        "role": "Developer",
+                        "salary": 70000,
+                    },
+                    {
+                        "name": "Bob",
+                        "role": "Designer",
+                        "salary": 60000,
+                    },
+                ],
+            },
+        ),
     ],
 )
 def test_objects(name, schema, value):

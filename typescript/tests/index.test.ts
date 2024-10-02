@@ -15,7 +15,7 @@ enum Color {
 	BLUE = "blue",
 }
 
-describe.skip("Promptbuf encoding and decoding tests", () => {
+describe("Promptbuf encoding and decoding tests", () => {
 	/*
 		Primitives
 	*/
@@ -205,6 +205,48 @@ describe.skip("Promptbuf encoding and decoding tests", () => {
 				},
 			},
 			{ ids: [1, 2, 3, 4, 5], age: 29, isEnabled: false }
+		);
+	});
+
+	test("Nested array of objects", () => {
+		runTest(
+			"Nested array of objects",
+			{
+				type: "object",
+				properties: {
+					employees: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								name: {
+									type: "string",
+								},
+								role: {
+									type: "string",
+								},
+								salary: {
+									type: "integer",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				employees: [
+					{
+						name: "Alice",
+						role: "Developer",
+						salary: 70000,
+					},
+					{
+						name: "Bob",
+						role: "Designer",
+						salary: 60000,
+					},
+				],
+			}
 		);
 	});
 });

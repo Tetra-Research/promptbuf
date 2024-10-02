@@ -110,9 +110,15 @@ export class Promptbuf {
 
 	private __decode_array(v: string[], s: JSONSchema7): any[] {
 		const a = [];
-		while (v[0] !== "]") {
-			a.push(this.__decode(v, s.items as JSONSchema7));
+
+		while (v.length > 0 && v[0] !== "]") {
+			const value = this.__decode(v, s.items as JSONSchema7);
+
+			if (value !== undefined) {
+				a.push(value);
+			}
 		}
+
 		return a;
 	}
 

@@ -61,7 +61,7 @@ class Promptbuf:
 
     def __decode(self, v: List[str], s: JSONSchema) -> Any:
         if not v:
-            return None
+            return
 
         char = v.pop(0)
 
@@ -92,9 +92,13 @@ class Promptbuf:
 
     def __decode_array(self, v: List[str], s: JSONSchema) -> List[Any]:
         a = []
-        while v[0] != "]":
-            a.append(self.__decode(v, s["items"]))
-        v.pop(0)  # Remove the closing bracket
+
+        while len(v) > 0 and v[0] != "]":
+            value = self.__decode(v, s["items"])
+
+            if value:
+                a.append(value)
+
         return a
 
     def __decode_string(self, v: List[str]) -> str:
