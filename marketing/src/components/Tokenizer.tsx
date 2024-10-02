@@ -267,11 +267,6 @@ function Tokenizer() {
 				(numEncodedTokens - numJSONTokens) * (1 / (selectedModel.tps / 1000))
 		  );
 
-	console.log(
-		"buildTSExample",
-		selectedExample ? buildTSExample(selectedExample) : ""
-	);
-
 	const getExampleValue = (
 		example: Example,
 		format: "JSON" | "Typescript" | "Python",
@@ -292,7 +287,7 @@ function Tokenizer() {
 
 	return (
 		<div className="w-full flex items-center justify-center">
-			<div className="text-white py-4 sm:py-8 md:py-12 lg:py-20 flex items-center justify-center flex-col space-y-8 w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
+			<div className="text-black py-4 sm:py-8 md:py-12 lg:py-20 flex items-center justify-center flex-col space-y-8 w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
 				<div className="space-y-4 w-full">
 					{/* Controls */}
 					<div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
