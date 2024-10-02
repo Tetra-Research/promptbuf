@@ -132,13 +132,59 @@ const examples: Example[] = [
 	},
 ];
 
+const buildTSExample = (ex: Example) => {
+	const pb = new Promptbuf(ex.schema);
+	const schemaStr = JSON.stringify(ex.schema, null, 2);
+	const valueStr = JSON.stringify(ex.value, null, 2);
+	const encoded = pb.encode(ex.value);
+	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
+
+	return `import { Promptbuf } from "promptbuf";
+
+const json_schema = ${schemaStr};
+
+value = ${valueStr}
+
+const pb = new Promptbuf(json_schema);
+
+const encoded = pb.encode(value);
+
+console.log(encoded); // ${encoded}
+
+const decoded = pb.decode(value);
+
+console.log(decoded); // ${decodedStr}
+`;
+};
+
+const buildPythonExample = (ex: Example) => {
+	const pb = new Promptbuf(ex.schema);
+	const schemaStr = JSON.stringify(ex.schema, null, 2);
+	const valueStr = JSON.stringify(ex.value, null, 2);
+	const encoded = pb.encode(ex.value);
+	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
+
+	return `from promptbuf import Promptbuf
+
+json_schema = ${schemaStr}
+
+value = ${valueStr}
+
+const pb = Promptbuf(json_schema)
+
+const encoded = pb.encode(value)
+
+print(encoded) # ${encoded}
+
+const decoded = pb.decode(value)
+
+print(decoded) # ${decodedStr}
+`;
+};
+
 interface Model {
 	model: TiktokenModel;
 	name: string;
-	// enc: (
-	// 	model: TiktokenModel,
-	// 	extend_special_tokens?: Record<string, number>
-	// ) => Tiktoken;
 	enc: Tiktoken;
 	tps: number;
 }
@@ -170,6 +216,19 @@ const models: Model[] = [
 		tps: 105.2,
 	},
 ];
+
+function Metric({ title, value }: { title: string; value: string }) {
+	return (
+		<div className="flex justify-center items-center">
+			<div className="text-left w-2/4 md:w-full">
+				<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
+					{title}
+				</h3>
+				<p className="text-xl sm:text-2xl lg:text-3xl font-bold">{value}</p>
+			</div>
+		</div>
+	);
+}
 
 function Tokenizer() {
 	const [selectedExample, setSelectedExample] = useState<Example | null>(null);
@@ -208,10 +267,33 @@ function Tokenizer() {
 				(numEncodedTokens - numJSONTokens) * (1 / (selectedModel.tps / 1000))
 		  );
 
+	console.log(
+		"buildTSExample",
+		selectedExample ? buildTSExample(selectedExample) : ""
+	);
+
+	const getExampleValue = (
+		example: Example,
+		format: "JSON" | "Typescript" | "Python",
+		prettyFormat: boolean = false
+	) => {
+		switch (format) {
+			case "Typescript": {
+				return buildTSExample(example);
+			}
+			case "Python": {
+				return buildPythonExample(example);
+			}
+			default: {
+				return JSON.stringify(example.value, null, prettyFormat ? 2 : 0);
+			}
+		}
+	};
+
 	return (
-		<div className="text-white py-4 sm:py-8 md:py-12 lg:py-20 flex w-full items-center justify-center flex-col space-y-8">
-			<div className="space-y-4 w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
-				<div>
+		<div className="w-full flex items-center justify-center">
+			<div className="text-white py-4 sm:py-8 md:py-12 lg:py-20 flex items-center justify-center flex-col space-y-8 w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
+				<div className="space-y-4 w-full">
 					{/* Controls */}
 					<div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
 						{/* Example Controls */}
@@ -254,17 +336,19 @@ function Tokenizer() {
 									</SelectGroup>
 								</SelectContent>
 							</Select>
-							<div className="flex items-center space-x-2">
-								<Switch
-									id="test"
-									checked={prettyFormattingEnabled}
-									onCheckedChange={() =>
-										setPrettyFormattingEnabled(!prettyFormattingEnabled)
-									}
-									defaultChecked={false}
-								/>
-								<Label htmlFor="airplane-mode">Pretty formatted</Label>
-							</div>
+							{selectedFormat === "JSON" && (
+								<div className="flex items-center space-x-2">
+									<Switch
+										id="test"
+										checked={prettyFormattingEnabled}
+										onCheckedChange={() =>
+											setPrettyFormattingEnabled(!prettyFormattingEnabled)
+										}
+										defaultChecked={false}
+									/>
+									<Label htmlFor="airplane-mode">Pretty formatted</Label>
+								</div>
+							)}
 						</div>
 						<div className="mt-4 sm:mt-0">
 							{/* Text controls */}
@@ -289,16 +373,31 @@ function Tokenizer() {
 							</Select>
 						</div>
 					</div>
+
 					<div className="flex flex-col md:flex-row gap-4 mt-4">
 						<Textarea
 							className="h-40 md:h-48 lg:h-56 resize-none flex-grow"
 							placeholder="Select an example to preview"
 							value={
-								selectedExample?.value
-									? JSON.stringify(
-											selectedExample?.value,
-											null,
-											prettyFormattingEnabled ? 2 : 0
+								selectedExample
+									? getExampleValue(
+											selectedExample,
+											selectedFormat,
+											prettyFormattingEnabled
+									  )
+									: ""
+							}
+							readOnly
+						/>
+					</div>
+					<div className="flex flex-col md:flex-row gap-4">
+						<Textarea
+							className="h-40 md:h-48 lg:h-56 resize-none flex-grow"
+							placeholder="Select an example to preview"
+							value={
+								selectedExample
+									? new Promptbuf(selectedExample.schema).encode(
+											selectedExample.value
 									  )
 									: ""
 							}
@@ -306,74 +405,42 @@ function Tokenizer() {
 						/>
 					</div>
 				</div>
-				<div className="flex flex-col md:flex-row gap-4">
-					<Textarea
-						className="h-40 md:h-48 lg:h-56 resize-none flex-grow"
-						placeholder="Select an example to preview"
+				{/* <div className="w-full px-4 sm:px-6 md:px-8  lg:w-3/4 xl:w-2/3"> */}
+				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-11/12">
+					<Metric
+						title="Original Tokens"
 						value={
-							selectedExample
-								? new Promptbuf(selectedExample.schema).encode(
-										selectedExample.value
-								  )
-								: ""
+							bothSelected
+								? encoding_for_model(selectedModel.model)
+										.encode(JSON.stringify(selectedExample.value))
+										.length.toString()
+								: "--"
 						}
-						readOnly
 					/>
-				</div>
-			</div>
-			<div className="w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-					<div className="flex justify-center items-center">
-						<div className="text-left">
-							<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
-								Original Tokens
-							</h3>
-							<p className="text-xl sm:text-2xl lg:text-3xl font-bold">
-								{bothSelected
-									? encoding_for_model(selectedModel.model).encode(
-											JSON.stringify(selectedExample.value)
-									  ).length
-									: "--"}
-							</p>
-						</div>
-					</div>
-					<div className="flex justify-center items-center">
-						<div className="text-left">
-							<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
-								Encoded Tokens
-							</h3>
-							<p className="text-xl sm:text-2xl lg:text-3xl font-bold">
-								{bothSelected
-									? encoding_for_model(selectedModel.model).encode(
+					<Metric
+						title="Encoded Tokens"
+						value={
+							bothSelected
+								? encoding_for_model(selectedModel.model)
+										.encode(
 											new Promptbuf(selectedExample.schema).encode(
 												selectedExample.value
 											)
-									  ).length
-									: "--"}
-							</p>
-						</div>
-					</div>
-					<div className="flex justify-center items-center">
-						<div className="text-left">
-							<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
-								Token Count
-							</h3>
-							<p className="text-xl sm:text-2xl lg:text-3xl font-bold">
-								{bothSelected ? `${percentReduction}%` : "--"}
-							</p>
-						</div>
-					</div>
-					<div className="flex justify-center items-center">
-						<div className="text-left">
-							<h3 className="text-sm sm:text-base lg:text-lg font-semibold">
-								Latency Change
-							</h3>
-							<p className="text-xl sm:text-2xl lg:text-3xl font-bold">
-								{bothSelected ? `${latencyReduction} ms` : "--"}
-							</p>
-						</div>
-					</div>
+										)
+										.length.toString()
+								: "--"
+						}
+					/>
+					<Metric
+						title="Token Count"
+						value={bothSelected ? `${percentReduction}%` : "--"}
+					/>
+					<Metric
+						title="Latency Change"
+						value={bothSelected ? `${latencyReduction} ms` : "--"}
+					/>
 				</div>
+				{/* </div> */}
 			</div>
 		</div>
 	);
