@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { encoding_for_model, Tiktoken, TiktokenModel } from "tiktoken";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Promptbuf } from "promptbuf"; // type: ignore
+import { Promptbuf } from "promptbuf";
 import {
 	Select,
 	SelectContent,
@@ -206,7 +204,7 @@ const buildTSExample = (ex: Example) => {
 	const encoded = pb.encode(ex.value);
 	console.log("encoded", encoded);
 	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
-
+	console.log("decodedStr", decodedStr);
 	return `import { Promptbuf } from "promptbuf"
 	${ex.extraCode?.ts ?? "" + "\n"}
 
