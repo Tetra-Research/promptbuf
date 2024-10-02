@@ -169,7 +169,8 @@ const examples: Example[] = [
 			},
 		},
 		extraCode: {
-			ts: `enum Sentiment {
+			ts: `
+enum Sentiment {
 	POSITIVE = "positive",
 	NEUTRAL = "neutral",
 	NEGATIVE = "negative",
@@ -202,12 +203,10 @@ const buildTSExample = (ex: Example) => {
 	const schemaStr = JSON.stringify(ex.schema, null, 2);
 	const valueStr = JSON.stringify(ex.value, null, 2);
 	const encoded = pb.encode(ex.value);
-	console.log("encoded", encoded);
 	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
-	console.log("decodedStr", decodedStr);
-	return `import { Promptbuf } from "promptbuf"
-	${ex.extraCode?.ts ?? "" + "\n"}
 
+	return `import { Promptbuf } from "promptbuf"
+${ex.extraCode?.ts ?? ""}
 const json_schema = ${schemaStr};
 
 value = ${valueStr}
@@ -232,7 +231,7 @@ const buildPythonExample = (ex: Example) => {
 	const decodedStr = JSON.stringify(pb.decode(encoded), null, 0);
 
 	return `from promptbuf import Promptbuf
-${ex.extraCode?.python ?? "" + "\n"}
+${ex.extraCode?.python ?? ""}
 json_schema = ${schemaStr}
 
 value = ${valueStr}
