@@ -359,7 +359,7 @@ function Tokenizer() {
 
 	return (
 		<div className="w-full flex items-center justify-center">
-			<div className="text-black py-4 sm:py-8 md:py-12 lg:py-20 flex items-center justify-center flex-col space-y-8 w-full px-4 sm:px-6 md:px-8 lg:w-3/4 xl:w-2/3">
+			<div className="text-black py-4 sm:py-8 md:py-12 lg:py-20 flex items-center justify-center flex-col space-y-8 w-full px-4 sm:px-6 md:px-8 ">
 				<div className="space-y-4 w-full">
 					{/* Controls */}
 					<div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
@@ -413,7 +413,7 @@ function Tokenizer() {
 										}
 										defaultChecked={false}
 									/>
-									<Label htmlFor="airplane-mode">Pretty formatted</Label>
+									<Label htmlFor="airplane-mode">Prettify</Label>
 								</div>
 							)}
 						</div>
@@ -475,27 +475,11 @@ function Tokenizer() {
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-11/12">
 					<Metric
 						title="Original Tokens"
-						value={
-							bothSelected
-								? encoding_for_model(selectedModel.model)
-										.encode(JSON.stringify(selectedExample.value))
-										.length.toString()
-								: ""
-						}
+						value={bothSelected ? numJSONTokens.toString() : ""}
 					/>
 					<Metric
 						title="Encoded Tokens"
-						value={
-							bothSelected
-								? encoding_for_model(selectedModel.model)
-										.encode(
-											new Promptbuf(selectedExample.schema).encode(
-												selectedExample.value
-											)
-										)
-										.length.toString()
-								: ""
-						}
+						value={bothSelected ? numEncodedTokens.toString() : ""}
 					/>
 					<Metric
 						title="Token Count"
