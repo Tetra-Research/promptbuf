@@ -303,12 +303,14 @@ function Metric({ title, value }: { title: string; value: string }) {
 }
 
 function Tokenizer() {
-	const [selectedExample, setSelectedExample] = useState<Example | null>(null);
-	const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+	const [selectedExample, setSelectedExample] = useState<Example | null>(
+		examples[3]
+	);
+	const [selectedModel, setSelectedModel] = useState<Model | null>(models[3]);
 	const [selectedFormat, setSelectedFormat] = useState<
 		"JSON" | "Typescript" | "Python"
 	>("JSON");
-	const [prettyFormattingEnabled, setPrettyFormattingEnabled] = useState(false);
+	const [prettyFormattingEnabled, setPrettyFormattingEnabled] = useState(true);
 
 	const bothSelected = selectedExample && selectedModel;
 
