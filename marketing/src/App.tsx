@@ -1,4 +1,8 @@
 import "./App.css";
+import GithubIcon from "./assets/github.svg";
+import NpmIcon from "./assets/npm.svg";
+import PythonIcon from "./assets/python.svg";
+
 import Tokenizer from "./components/Tokenizer";
 
 function App() {
@@ -12,6 +16,29 @@ function App() {
 						Promptbuf is a JSON minifier that maintains semantic meaning. Built
 						specifically for high-volume, low-latency prompt engineering.
 					</p>
+					<div className="inline-flex space-x-4">
+						<a
+							href="https://github.com/Tetra-Research/promptbuf"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<img className="w-8 h-8" src={GithubIcon} alt="Github Icon" />
+						</a>
+						<a
+							href="https://pypi.org/project/promptbuf/"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<img className="w-8 h-8" src={PythonIcon} alt="Pypi Icon" />
+						</a>
+						<a
+							href="https://www.npmjs.com/package/promptbuf"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<img className="w-8 h-8" src={NpmIcon} alt="NPM Icon" />
+						</a>
+					</div>
 				</div>
 			</div>
 			<div className="md:col-span-9">
